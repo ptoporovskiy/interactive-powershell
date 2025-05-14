@@ -9,66 +9,80 @@
 <body>
     <div class="container">
         <header>
-            <h1>🔧 Interactive PowerShell Command Builder</h1>
-            <p>Build PowerShell commands visually with an interactive interface</p>
+            <h1><span class="header-icon">🚀</span> Interactive PowerShell</h1>
+            <p>Visually construct PowerShell commands step-by-step</p>
         </header>
 
-        <div class="builder-section">
-            <div class="command-builder">
-                <div class="step">
-                    <label for="verb-select">1. Choose Verb:</label>
-                    <select id="verb-select">
-                        <option value="">Select a verb...</option>
-                    </select>
-                </div>
-
-                <div class="step">
-                    <label for="noun-select">2. Choose Noun:</label>
-                    <select id="noun-select" disabled>
-                        <option value="">Select a noun...</option>
-                    </select>
-                </div>
-
-                <div class="step">
-                    <label>3. Select Parameters:</label>
-                    <div id="parameters-container" class="parameters-grid">
-                        <!-- Parameters will be populated here -->
+        <div class="command-constructor">
+            <div class="steps-horizontal-container">
+                <!-- Step 1: Verbs -->
+                <div class="step-column" id="verb-column">
+                    <h2>1. Choose Verb</h2>
+                    <div class="selectable-list-container">
+                        <ul id="verb-list" class="selectable-list">
+                            <!-- Verbs will be populated here -->
+                        </ul>
                     </div>
                 </div>
 
-                <div class="step">
-                    <label>4. Add Piping (Optional):</label>
-                    <div id="piping-section">
-                        <button id="add-pipe" disabled>+ Add Pipe</button>
-                        <div id="pipes-container"></div>
+                <!-- Step 2: Nouns -->
+                <div class="step-column disabled-column" id="noun-column">
+                    <h2>2. Choose Noun</h2>
+                    <div class="selectable-list-container">
+                        <ul id="noun-list" class="selectable-list">
+                            <!-- Nouns will be populated here -->
+                             <li class="placeholder-item">Select a verb first</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Step 3: Parameters -->
+                <div class="step-column disabled-column" id="parameter-column">
+                    <h2>3. Select Parameters</h2>
+                    <div class="selectable-list-container">
+                        <ul id="parameter-list" class="selectable-list parameter-items-list">
+                            <!-- Parameters will be populated here -->
+                            <li class="placeholder-item">Select a noun first</li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            <div class="output-section">
-                <h3>Generated Command:</h3>
-                <div class="command-output">
-                    <code id="generated-command">Select a verb and noun to start building...</code>
+            <!-- Step 4: Piping -->
+            <div class="piping-section-container disabled-column" id="piping-column">
+                <h2>4. Add Piping <span class="optional-text">(Optional)</span></h2>
+                <div id="piping-controls">
+                    <button id="add-pipe-segment-button" disabled>+ Add to Pipeline</button>
                 </div>
-                <button id="copy-command" disabled>📋 Copy Command</button>
+                <div id="pipeline-segments-display">
+                    <!-- Pipeline segments will be shown here -->
+                </div>
             </div>
         </div>
 
+        <div class="output-section">
+            <h3>Generated Command:</h3>
+            <div class="command-output">
+                <code id="generated-command">Build your command above...</code>
+            </div>
+            <button id="copy-command" disabled>📋 Copy Command</button>
+        </div>
+
         <div class="examples-section">
-            <h2>Common Patterns</h2>
+            <h2>Common Command Examples</h2>
             <div class="examples-grid">
                 <div class="example-card" data-example-id="file-ops">
-                    <h3>📁 File Operations</h3>
-                    <code>Get-ChildItem -Recurse | Format-Table</code>
+                    <h3><span class="category-icon">📁</span> File Operations</h3>
+                    <code>Get-ChildItem -Recurse -File | Format-Table Name, Length</code>
                     <button>Load Example</button>
                 </div>
                 <div class="example-card" data-example-id="data-process">
-                    <h3>📊 Data Processing</h3>
-                    <code>Import-Csv data.csv | Where-Object -Property Name -EQ 'Value' | Select-Object Name, Version</code>
+                    <h3><span class="category-icon">📊</span> Data Processing</h3>
+                    <code>Import-Csv 'data.csv' | Where-Object -Property Name -EQ 'Value' | Select-Object Name, Version</code>
                     <button>Load Example</button>
                 </div>
                 <div class="example-card" data-example-id="system-mgmt">
-                    <h3>⚙️ System Management</h3>
+                    <h3><span class="category-icon">⚙️</span> System Management</h3>
                     <code>Get-Process -Name 'chrome' | Stop-Process -Force</code>
                     <button>Load Example</button>
                 </div>

@@ -1,3 +1,4 @@
+/* General Resets and Base Styles */
 * {
     margin: 0;
     padding: 0;
@@ -5,7 +6,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
     background-color: #1e1e1e; /* Dark background */
     color: #d4d4d4; /* Light grey text */
     line-height: 1.6;
@@ -15,7 +16,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px; /* Increased max-width for horizontal layout */
     margin: 20px auto;
     padding: 20px;
     flex-grow: 1;
@@ -31,113 +32,231 @@ header {
 header h1 {
     color: #4fc3f7; /* Light blue for PowerShell-like feel */
     margin-bottom: 10px;
-    font-size: 2.5rem;
+    font-size: 2.2rem; /* Slightly reduced */
+}
+.header-icon {
+    margin-right: 10px;
 }
 
 header p {
     color: #a0a0a0;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
-.builder-section, .examples-section {
-    background-color: #252526; /* Slightly lighter dark for sections */
+/* Command Constructor Area */
+.command-constructor {
+    background-color: #252526;
     border-radius: 8px;
-    padding: 25px;
+    padding: 20px;
     margin-bottom: 30px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-.step {
+.steps-horizontal-container {
+    display: flex;
+    gap: 20px; /* Space between columns */
     margin-bottom: 20px;
 }
 
-.step label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #4fc3f7;
-}
-
-select, input[type="text"], button {
-    background-color: #3c3c3c; /* Darker input background */
-    color: #d4d4d4;
-    border: 1px solid #555;
-    border-radius: 5px;
-    padding: 10px 12px;
-    font-size: 1rem;
-    width: 100%; /* Make selects and inputs full width of their container */
-    margin-top: 5px;
-}
-
-button {
-    cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-    width: auto; /* Buttons shouldn't always be full width */
-    padding: 10px 20px;
-}
-
-
-select:hover, input[type="text"]:hover, button:hover:not(:disabled) {
-    background-color: #4a4a4a;
-    border-color: #4fc3f7;
-}
-
-select:focus, input[type="text"]:focus {
-    outline: none;
-    border-color: #4fc3f7;
-    box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.3);
-}
-
-select:disabled, input[type="text"]:disabled, button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: #333;
-}
-
-.parameters-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
-    margin-top: 10px;
-}
-
-.parameter-item {
-    background-color: #333333;
+.step-column {
+    background-color: #2d2d2d;
+    border: 1px solid #3a3a3a;
     border-radius: 6px;
     padding: 15px;
-    border: 1px solid #4a4a4a;
+    flex: 1; /* Distribute space equally */
+    min-width: 250px; /* Minimum width for readability */
     display: flex;
     flex-direction: column;
 }
 
-.parameter-item label { /* For checkbox labels */
-    color: #d4d4d4;
-    font-weight: normal;
+.step-column h2 {
+    color: #4fc3f7;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #3f3f3f;
+    text-align: center;
+}
+
+.step-column.disabled-column {
+    opacity: 0.5;
+    pointer-events: none; /* Prevent interaction */
+    filter: grayscale(50%);
+}
+.step-column.disabled-column .selectable-list-container {
+    border-color: #333;
+}
+
+
+.selectable-list-container {
+    flex-grow: 1; /* Allow list to take available vertical space */
+    overflow-y: auto; /* Add scroll for long lists */
+    max-height: 400px; /* Limit height */
+    border: 1px solid #383838;
+    border-radius: 4px;
+    padding: 5px;
+    background-color: #202020;
+}
+
+.selectable-list {
+    list-style: none;
+}
+
+.selectable-list .placeholder-item {
+    color: #777;
+    padding: 10px;
+    text-align: center;
+    font-style: italic;
+    opacity: 1 !important; /* Override general opacity for placeholder */
+    border: none !important;
+}
+
+
+.selectable-list li {
+    background-color: #333333;
+    color: #ccc;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.6; /* Initial 50% transparency (use opacity as it's simpler) */
+    border: 3px solid transparent; /* For hover effect without layout shift */
+    transition: opacity 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    display: flex; /* For icon alignment */
+    align-items: center;
+}
+
+.selectable-list li:hover {
+    opacity: 1;
+    border-color: #4fc3f7; /* Highlight border */
+    background-color: #3c3c3c;
+}
+
+.selectable-list li.selected {
+    opacity: 1;
+    background-color: #005a9e; /* Selected background */
+    color: #fff;
+    border-color: #007acc;
+    font-weight: bold;
+}
+.selectable-list li.selected:hover {
+    background-color: #006cbf;
+}
+
+.item-icon {
+    margin-right: 8px;
+    opacity: 0.5; /* Icons 50% transparent */
+    font-size: 0.9em;
+}
+.selectable-list li.selected .item-icon {
+    opacity: 0.8;
+}
+
+
+/* Parameter Specific Styling */
+.parameter-items-list li {
+    flex-direction: column; /* Stack checkbox/label and input */
+    align-items: flex-start;
+}
+
+.parameter-item-label {
     display: flex;
     align-items: center;
+    width: 100%; /* Take full width */
     cursor: pointer;
 }
 
 .parameter-checkbox {
     margin-right: 10px;
-    accent-color: #4fc3f7; /* Style checkbox color */
-    width: 18px;
-    height: 18px;
+    accent-color: #4fc3f7;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
 }
+
+.parameter-name {
+    flex-grow: 1;
+}
+.parameter-type {
+    font-size: 0.8em;
+    color: #888;
+    margin-left: 5px;
+}
+.selectable-list li.selected .parameter-type {
+    color: #ddd;
+}
+
 
 .parameter-input {
-    width: calc(100% - 24px); /* Adjust width based on padding */
+    width: calc(100% - 10px); /* Full width minus padding */
     margin-top: 8px;
-    background-color: #2d2d2d; /* Even darker for input fields within params */
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 4px;
+    padding: 8px;
+    color: #d4d4d4;
+    font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
 }
 
-.parameter-item.selected {
+.parameter-input:disabled {
+    background-color: #303030;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.selectable-list li:not(.has-value-selected) .parameter-input {
+    display: none; /* Hide input if parameter not selected or doesn't take value */
+}
+.selectable-list li.has-value-selected .parameter-input {
+    display: block;
+}
+
+
+/* Piping Section */
+.piping-section-container {
+    margin-top: 25px;
+    background-color: #2d2d2d;
+    border: 1px solid #3a3a3a;
+    border-radius: 6px;
+    padding: 20px;
+}
+.piping-section-container.disabled-column {
+    opacity: 0.5;
+    pointer-events: none;
+    filter: grayscale(50%);
+}
+.piping-section-container h2 {
+    color: #4fc3f7;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+.optional-text {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: normal;
+}
+
+#piping-controls button {
+    background-color: #3c3c3c;
+    color: #d4d4d4;
+    border: 1px solid #555;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+#piping-controls button:hover:not(:disabled) {
+    background-color: #4a4a4a;
     border-color: #4fc3f7;
-    background-color: #2a2a35; /* Slightly different background for selected */
+}
+#piping-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
+
+/* Output Section */
 .output-section {
-    background-color: #202020; /* Darker for output section */
+    background-color: #202020;
     border-radius: 8px;
     padding: 25px;
     margin-bottom: 30px;
@@ -149,7 +268,7 @@ select:disabled, input[type="text"]:disabled, button:disabled {
 }
 
 .command-output {
-    background-color: #1a1a1a; /* Very dark for the code block itself */
+    background-color: #1a1a1a;
     border-radius: 6px;
     padding: 15px 20px;
     margin: 15px 0;
@@ -160,29 +279,37 @@ select:disabled, input[type="text"]:disabled, button:disabled {
 }
 
 .command-output code {
-    color: #9cdcfe; /* Light blue for code text, common in dark themes */
-    font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace;
+    color: #9cdcfe;
     font-size: 1rem;
     line-height: 1.5;
     word-break: break-all;
-    white-space: pre-wrap; /* Allow wrapping */
+    white-space: pre-wrap;
 }
 
 #copy-command {
-    background-color: #007acc; /* A common blue for primary actions */
+    background-color: #007acc;
     color: #ffffff;
     border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
     font-weight: 600;
+    cursor: pointer;
 }
-
 #copy-command:hover:not(:disabled) {
     background-color: #005a9e;
 }
+#copy-command:disabled {
+     opacity: 0.5; cursor: not-allowed;
+}
 
+/* Examples Section */
 .examples-section h2 {
     color: #4fc3f7;
     margin-bottom: 20px;
     text-align: center;
+}
+.category-icon {
+    margin-right: 8px;
 }
 
 .examples-grid {
@@ -195,7 +322,7 @@ select:disabled, input[type="text"]:disabled, button:disabled {
     background-color: #2d2d2d;
     border-radius: 8px;
     padding: 20px;
-    text-align: left; /* Align text left for readability */
+    text-align: left;
     border: 1px solid #444;
     transition: all 0.3s ease;
     display: flex;
@@ -222,7 +349,6 @@ select:disabled, input[type="text"]:disabled, button:disabled {
     border-radius: 6px;
     margin: 10px 0;
     color: #9cdcfe;
-    font-family: 'Consolas', 'Monaco', monospace;
     font-size: 0.9rem;
     white-space: pre-wrap;
     word-break: break-all;
@@ -233,7 +359,9 @@ select:disabled, input[type="text"]:disabled, button:disabled {
     border: 1px solid #555;
     padding: 8px 16px;
     margin-top: 15px;
-    align-self: flex-start; /* Align button to the start */
+    align-self: flex-start;
+    color: #d4d4d4;
+    border-radius: 5px;
 }
 
 .example-card button:hover:not(:disabled) {
@@ -242,49 +370,33 @@ select:disabled, input[type="text"]:disabled, button:disabled {
     border-color: #4fc3f7;
 }
 
-.pipes-container {
-    margin-top: 15px;
+/* Responsive Adjustments */
+@media (max-width: 992px) { /* Tablet and below */
+    .steps-horizontal-container {
+        flex-direction: column; /* Stack columns vertically */
+    }
+    .step-column {
+        min-width: auto; /* Allow columns to shrink */
+    }
+    .selectable-list-container {
+        max-height: 250px; /* Reduce height on smaller screens */
+    }
 }
 
-.pipe-segment { /* Renamed from .pipe-item for clarity */
-    background-color: #333333;
-    border-radius: 6px;
-    padding: 20px;
-    margin-bottom: 15px;
-    border-left: 3px solid #007acc; /* Blue to indicate a piped segment */
-    position: relative;
-}
-
-.pipe-segment .step { /* Reduce margin for steps within a pipe */
-    margin-bottom: 15px;
-}
-
-.remove-pipe-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: #c0392b; /* Red for remove */
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 0.9em;
-}
-.remove-pipe-btn:hover {
-    background-color: #a93226;
-}
-
-@media (max-width: 768px) {
+@media (max-width: 768px) { /* Mobile */
     .container {
-        padding: 15px;
+        padding: 10px;
     }
     header h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
-    .examples-grid, .parameters-grid {
-        grid-template-columns: 1fr; /* Stack on smaller screens */
+    .examples-grid {
+        grid-template-columns: 1fr;
     }
     .command-output code {
         font-size: 0.9rem;
+    }
+    .step-column h2, .piping-section-container h2, .output-section h3, .examples-section h2 {
+        font-size: 1rem;
     }
 }

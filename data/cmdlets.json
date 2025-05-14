@@ -1,48 +1,32 @@
 {
     "verbs": {
-        "Get": [
-            "ChildItem",
-            "Process",
-            "Service",
-            "Help",
-            "Command",
-            "Date",
-            "Content",
-            "Item"
-        ],
-        "Set": [
-            "Item",
-            "Location"
-        ],
-        "New": [
-            "Item",
-            "Object"
-        ],
-        "Import": [
-            "Csv",
-            "Module"
-        ],
-        "Export": [
-            "Csv"
-        ],
-        "Format": [
-            "List",
-            "Table",
-            "Wide"
-        ],
-        "Select": [
-            "Object"
-        ],
-        "Where": [
-            "Object"
-        ],
-        "Stop": [
-            "Process",
-            "Service"
-        ],
-        "Start": [
-            "Process",
-            "Service"
-        ]
+        "Get": ["ChildItem", "Process", "Service", "Help", "Command", "Date", "Content", "Item"],
+        "Set": ["Item", "Location"],
+        "New": ["Item", "Object"],
+        "Import": ["Csv", "Module"],
+        "Export": ["Csv"],
+        "Format": ["List", "Table", "Wide"],
+        "Select": ["Object"],
+        "Where": ["Object"],
+        "Stop": ["Process", "Service"],
+        "Start": ["Process", "Service"]
+    },
+    "categories": {
+        "File Operations": {
+            "icon": "📁",
+            "cmdlets": ["Get-ChildItem", "Get-Content", "Get-Item", "Set-Item", "New-Item"]
+        },
+        "Data Processing": {
+            "icon": "📊",
+            "cmdlets": ["Import-Csv", "Export-Csv", "Format-List", "Format-Table", "Format-Wide", "Select-Object", "Where-Object"]
+        },
+        "System Management": {
+            "icon": "⚙️",
+            "cmdlets": ["Get-Process", "Stop-Process", "Start-Process", "Get-Service", "Stop-Service", "Start-Service", "Get-Command", "Get-Help", "New-Object"]
+        },
+        "Other": {
+            "icon": "🔧",
+            "cmdlets": ["Get-Date", "Set-Location"]
+        }
     }
 }

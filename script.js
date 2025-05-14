@@ -1,212 +1,293 @@
-// Interactive PowerShell - script.js
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Interactive PowerShell Builder Loaded!");
+    console.log("Interactive PowerShell V2 Loaded!");
 
     // --- DOM Elements ---
-    const verbSelect = document.getElementById('verb-select');
-    const nounSelect = document.getElementById('noun-select');
-    const parametersContainer = document.getElementById('parameters-container');
+    const verbList = document.getElementById('verb-list');
+    const nounList = document.getElementById('noun-list');
+    const parameterList = document.getElementById('parameter-list');
+
+    const verbColumn = document.getElementById('verb-column');
+    const nounColumn = document.getElementById('noun-column');
+    const parameterColumn = document.getElementById('parameter-column');
+    const pipingColumn = document.getElementById('piping-column');
+
     const generatedCommandElement = document.getElementById('generated-command');
     const copyCommandButton = document.getElementById('copy-command');
-    const addPipeButton = document.getElementById('add-pipe');
-    const pipesContainer = document.getElementById('pipes-container');
-    const exampleCards = document.querySelectorAll('.example-card');
+    const addPipeSegmentButton = document.getElementById('add-pipe-segment-button');
+    // const exampleCards = document.querySelectorAll('.example-card button'); // Corrected selector
 
-    // --- State ---
-    let commandParts = []; // To store each part of the command [{verb, noun, params:[]}, {verb, noun, params:[]}]
-    let cmdletData = {}; // To store loaded cmdlets.json
-    let parameterData = {}; // To store loaded parameters.json
+    // --- State for the current (first) command segment ---
+    let currentSelectedVerb = null;
+    let currentSelectedNoun = null;
+    let currentSelectedCmdlet = null;
+    let currentParameters = {}; // { paramName: { value: '...', type: 'String', selected: true }, ... }
 
-    // --- Initial Load ---
+    // --- Data ---
+    let cmdletData = {};
+    let parameterData = {};
+
+    // --- Initialize ---
     async function initializeApp() {
         await loadData();
         populateVerbs();
-        // Any other initial setup
+        updateGeneratedCommand(); // Initial update
+        setupExampleLoaders();
     }
 
     // --- Data Loading ---
     async function loadData() {
         try {
-            const cmdletResponse = await fetch('data/cmdlets.json');
-            cmdletData = await cmdletResponse.json();
-            const parameterResponse = await fetch('data/parameters.json');
-            parameterData = await parameterResponse.json();
+            const [cmdletRes, paramRes] = await Promise.all([
+                fetch('data/cmdlets.json'),
+                fetch('data/parameters.json')
+            ]);
+            cmdletData = await cmdletRes.json();
+            parameterData = await paramRes.json();
             console.log("Data loaded:", { cmdletData, parameterData });
         } catch (error) {
             console.error("Failed to load data:", error);
-            generatedCommandElement.textContent = "Error: Could not load cmdlet data.";
+            generatedCommandElement.textContent = "Error: Could not load command data.";
         }
     }
 
     // --- UI Population ---
-    function populateVerbs() {
-        if (!cmdletData.verbs) {
-            console.error("cmdletData.verbs is undefined");
-            return;
+    function getCmdletCategoryIcon(verb, noun) {
+        const cmdletName = `${verb}-${noun}`;
+        if (cmdletData.categories) {
+            for (const categoryKey in cmdletData.categories) {
+                const category = cmdletData.categories[categoryKey];
+                if (category.cmdlets.includes(cmdletName)) {
+                    return category.icon;
+                }
+            }
         }
-        const verbs = Object.keys(cmdletData.verbs).sort();
-        verbs.forEach(verb => {
-            const option = document.createElement('option');
-            option.value = verb;
-            option.textContent = verb;
-            verbSelect.appendChild(option);
-        });
-        verbSelect.disabled = false;
+        // Fallback for verbs if noun not yet selected or cmdlet not categorized
+        if (cmdletData.categories) {
+             for (const categoryKey in cmdletData.categories) {
+                const category = cmdletData.categories[categoryKey];
+                if (category.cmdlets.some(c => c.startsWith(verb + "-"))) { // Looser match for verb
+                    // return category.icon; // Could be too broad
+                }
+            }
+        }
+        return cmdletData.categories?.Other?.icon || "▫️"; // Default icon
     }
 
-    function populateNouns(selectedVerb) {
-        nounSelect.innerHTML = '<option value="">Select a noun...</option>'; // Clear previous nouns
-        nounSelect.disabled = true;
-        parametersContainer.innerHTML = ''; // Clear params
 
-        if (selectedVerb && cmdletData.verbs[selectedVerb]) {
-            const nouns = cmdletData.verbs[selectedVerb].sort();
-            nouns.forEach(noun => {
-                const option = document.createElement('option');
-                option.value = noun;
-                option.textContent = noun;
-                nounSelect.appendChild(option);
-            });
-            nounSelect.disabled = false;
+    function populateVerbs() {
+        verbList.innerHTML = ''; // Clear previous
+        if (!cmdletData.verbs) {
+            verbList.innerHTML = '<li class="placeholder-item">No verbs loaded</li>';
+            return;
         }
+
+        const verbs = Object.keys(cmdletData.verbs).sort();
+        verbs.forEach(verb => {
+            const li = document.createElement('li');
+            li.dataset.value = verb;
+            
+            const iconSpan = document.createElement('span');
+            iconSpan.classList.add('item-icon');
+            // For verbs, icon might be generic or based on common cmdlets for that verb
+            let verbIcon = "▫️"; // Default
+            if (cmdletData.categories) {
+                 // Try to find a representative icon for the verb based on its nouns
+                const typicalNoun = cmdletData.verbs[verb]?.[0];
+                if (typicalNoun) verbIcon = getCmdletCategoryIcon(verb, typicalNoun);
+            }
+            iconSpan.textContent = verbIcon;
+
+            li.appendChild(iconSpan);
+            li.appendChild(document.createTextNode(verb));
+            
+            li.addEventListener('click', () => handleVerbSelection(verb, li));
+            verbList.appendChild(li);
+        });
+    }
+
+    function handleVerbSelection(verb, selectedLi) {
+        // Visual selection
+        verbList.querySelectorAll('li').forEach(item => item.classList.remove('selected'));
+        selectedLi.classList.add('selected');
+
+        currentSelectedVerb = verb;
+        currentSelectedNoun = null; // Reset noun
+        currentSelectedCmdlet = null;
+        currentParameters = {}; // Reset params
+
+        populateNouns(verb);
+        parameterList.innerHTML = '<li class="placeholder-item">Select a noun first</li>'; // Clear params
+        
+        nounColumn.classList.remove('disabled-column');
+        parameterColumn.classList.add('disabled-column');
+        pipingColumn.classList.add('disabled-column');
+        addPipeSegmentButton.disabled = true;
+
         updateGeneratedCommand();
     }
 
-    function populateParameters(selectedCmdlet) { // e.g., "Get-ChildItem"
-        parametersContainer.innerHTML = ''; // Clear previous parameters
-        addPipeButton.disabled = true; // Disable pipe until cmdlet selected
+    function populateNouns(selectedVerb) {
+        nounList.innerHTML = ''; // Clear previous
+        if (!selectedVerb || !cmdletData.verbs[selectedVerb]) {
+            nounList.innerHTML = '<li class="placeholder-item">Select a verb first</li>';
+            return;
+        }
 
-        if (!selectedCmdlet || !parameterData.cmdlets[selectedCmdlet] || !parameterData.cmdlets[selectedCmdlet].parameters) {
-            console.warn(`No parameters found for ${selectedCmdlet}`);
-            if(selectedCmdlet) addPipeButton.disabled = false; // Enable if cmdlet is valid but no params
+        const nouns = cmdletData.verbs[selectedVerb].sort();
+        nouns.forEach(noun => {
+            const li = document.createElement('li');
+            li.dataset.value = noun;
+
+            const iconSpan = document.createElement('span');
+            iconSpan.classList.add('item-icon');
+            iconSpan.textContent = getCmdletCategoryIcon(selectedVerb, noun);
+            
+            li.appendChild(iconSpan);
+            li.appendChild(document.createTextNode(noun));
+
+            li.addEventListener('click', () => handleNounSelection(noun, li));
+            nounList.appendChild(li);
+        });
+    }
+
+    function handleNounSelection(noun, selectedLi) {
+        nounList.querySelectorAll('li').forEach(item => item.classList.remove('selected'));
+        selectedLi.classList.add('selected');
+
+        currentSelectedNoun = noun;
+        currentSelectedCmdlet = `${currentSelectedVerb}-${currentSelectedNoun}`;
+        currentParameters = {}; // Reset params
+
+        populateParameters(currentSelectedCmdlet);
+        parameterColumn.classList.remove('disabled-column');
+        pipingColumn.classList.remove('disabled-column');
+        addPipeSegmentButton.disabled = false;
+
+        updateGeneratedCommand();
+    }
+
+    function populateParameters(cmdletName) {
+        parameterList.innerHTML = ''; // Clear previous
+        currentParameters = {}; // Reset internal state
+
+        if (!cmdletName || !parameterData.cmdlets[cmdletName] || !parameterData.cmdlets[cmdletName].parameters) {
+            parameterList.innerHTML = `<li class="placeholder-item">No parameters for ${cmdletName}, or cmdlet not found.</li>`;
             updateGeneratedCommand();
             return;
         }
 
-        const params = parameterData.cmdlets[selectedCmdlet].parameters;
+        const params = parameterData.cmdlets[cmdletName].parameters;
         Object.entries(params).forEach(([paramName, paramDetails]) => {
-            const paramItem = document.createElement('div');
-            paramItem.classList.add('parameter-item');
-            paramItem.dataset.paramName = paramName;
+            const li = document.createElement('li');
+            li.dataset.paramName = paramName;
 
-            const checkboxLabel = document.createElement('label');
+            const label = document.createElement('label');
+            label.classList.add('parameter-item-label');
+
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.classList.add('parameter-checkbox');
-            checkbox.id = `param-${paramName}`;
+            checkbox.id = `param-check-${paramName}`;
             checkbox.dataset.paramName = paramName;
-            checkboxLabel.htmlFor = checkbox.id;
-            checkboxLabel.appendChild(checkbox);
-            checkboxLabel.appendChild(document.createTextNode(` ${paramName} `));
-            if(paramDetails.type !== "SwitchParameter") {
-                 checkboxLabel.appendChild(document.createTextNode(` (${paramDetails.type || 'string'})`));
-            }
 
+            const nameSpan = document.createElement('span');
+            nameSpan.classList.add('parameter-name');
+            nameSpan.textContent = paramName;
+            
+            const typeSpan = document.createElement('span');
+            typeSpan.classList.add('parameter-type');
+            typeSpan.textContent = `(${paramDetails.type.replace('System.Management.Automation.', '')})`; // Shorten type
 
-            paramItem.appendChild(checkboxLabel);
+            label.appendChild(checkbox);
+            label.appendChild(nameSpan);
+            label.appendChild(typeSpan);
+            li.appendChild(label);
+            
+            currentParameters[paramName] = { selected: false, value: '', type: paramDetails.type };
 
             if (paramDetails.type !== "SwitchParameter" && paramDetails.type !== "System.Management.Automation.SwitchParameter") {
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.classList.add('parameter-input');
-                input.placeholder = paramDetails.placeholder || `Enter value for ${paramName}`;
-                input.disabled = true; // Initially disabled
+                input.placeholder = paramDetails.placeholder || `Enter ${paramDetails.type}`;
                 input.dataset.paramName = paramName;
-                paramItem.appendChild(input);
+                // input.disabled = true; // Input starts hidden by CSS, enabled by class
+                li.appendChild(input);
 
-                checkbox.addEventListener('change', (e) => {
-                    input.disabled = !e.target.checked;
-                    if (!e.target.checked) input.value = ''; // Clear value if unchecked
-                    paramItem.classList.toggle('selected', e.target.checked);
-                    updateGeneratedCommand();
-                });
-                input.addEventListener('input', updateGeneratedCommand);
-            } else {
-                checkbox.addEventListener('change', (e) => {
-                    paramItem.classList.toggle('selected', e.target.checked);
+                input.addEventListener('input', (e) => {
+                    currentParameters[paramName].value = e.target.value;
                     updateGeneratedCommand();
                 });
             }
-            parametersContainer.appendChild(paramItem);
+            
+            // Click on the entire list item toggles the checkbox
+            li.addEventListener('click', (e) => {
+                // Prevent toggling if click was directly on input field or checkbox itself
+                if (e.target !== input && e.target !== checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    // Manually trigger change event for checkbox
+                    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+
+
+            checkbox.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                currentParameters[paramName].selected = isChecked;
+                li.classList.toggle('has-value-selected', isChecked && (paramDetails.type !== "SwitchParameter" && paramDetails.type !== "System.Management.Automation.SwitchParameter"));
+                li.classList.toggle('selected', isChecked); // General selected style
+                // if (input) input.disabled = !isChecked;
+                updateGeneratedCommand();
+            });
+
+            parameterList.appendChild(li);
         });
-        addPipeButton.disabled = false; // Enable pipe button after parameters are populated
         updateGeneratedCommand();
     }
 
-
     // --- Command Logic ---
     function updateGeneratedCommand() {
-        let currentCommand = "";
-        const selectedVerb = verbSelect.value;
-        const selectedNoun = nounSelect.value;
-
-        if (selectedVerb && selectedNoun) {
-            currentCommand = `${selectedVerb}-${selectedNoun}`;
-
-            const activeParameters = [];
-            parametersContainer.querySelectorAll('.parameter-item').forEach(item => {
-                const checkbox = item.querySelector('.parameter-checkbox');
-                if (checkbox.checked) {
-                    const paramName = checkbox.dataset.paramName;
-                    const paramDetails = parameterData.cmdlets[`${selectedVerb}-${selectedNoun}`]?.parameters[paramName];
-
-                    if (paramDetails && (paramDetails.type === "SwitchParameter" || paramDetails.type === "System.Management.Automation.SwitchParameter")) {
-                        activeParameters.push(`-${paramName}`);
+        let commandString = "";
+        if (currentSelectedCmdlet) {
+            commandString = currentSelectedCmdlet;
+            const activeParams = [];
+            for (const paramName in currentParameters) {
+                const paramState = currentParameters[paramName];
+                if (paramState.selected) {
+                    const paramDetails = parameterData.cmdlets[currentSelectedCmdlet]?.parameters[paramName];
+                    if (paramDetails.type === "SwitchParameter" || paramDetails.type === "System.Management.Automation.SwitchParameter") {
+                        activeParams.push(`-${paramName}`);
                     } else {
-                        const input = item.querySelector('.parameter-input');
-                        if (input && input.value.trim() !== '') {
-                            // Add quotes if value contains spaces and isn't already quoted
-                            let value = input.value.trim();
+                        let value = paramState.value.trim();
+                        if (value === '' && paramDetails.type !== "SwitchParameter") {
+                             // activeParams.push(`-${paramName} <value>`); // Indicate value needed
+                             // For now, don't add param if value is empty and not a switch
+                        } else {
                             if (value.includes(' ') && !((value.startsWith("'") && value.endsWith("'")) || (value.startsWith('"') && value.endsWith('"')))) {
                                 value = `'${value}'`;
                             }
-                            activeParameters.push(`-${paramName} ${value}`);
-                        } else if (input) { // Parameter selected but no value - show placeholder if needed or just the flag
-                           activeParameters.push(`-${paramName} <value>`); // Or decide how to handle empty values
+                            activeParams.push(`-${paramName} ${value}`);
                         }
                     }
                 }
-            });
-            if (activeParameters.length > 0) {
-                currentCommand += " " + activeParameters.join(" ");
+            }
+            if (activeParams.length > 0) {
+                commandString += " " + activeParams.join(" ");
             }
         }
 
-        // Handle piped commands (simplified for now, needs proper structure)
-        pipesContainer.querySelectorAll('.pipe-segment').forEach(segment => {
-            // This will need to be more sophisticated to build command for each segment
-            // For now, just placeholder
-            // currentCommand += " | ...";
-        });
-
-
-        if (currentCommand) {
-            generatedCommandElement.textContent = currentCommand;
+        if (commandString) {
+            generatedCommandElement.textContent = commandString;
             copyCommandButton.disabled = false;
         } else {
-            generatedCommandElement.textContent = "Select a verb and noun to start building...";
+            generatedCommandElement.textContent = "Build your command above...";
             copyCommandButton.disabled = true;
         }
     }
 
-
     // --- Event Listeners ---
-    verbSelect.addEventListener('change', (e) => {
-        populateNouns(e.target.value);
-        // Reset subsequent parts if changing the first verb
-    });
-
-    nounSelect.addEventListener('change', (e) => {
-        const selectedVerb = verbSelect.value;
-        if (selectedVerb && e.target.value) {
-            populateParameters(`${selectedVerb}-${e.target.value}`);
-        } else {
-            parametersContainer.innerHTML = ''; // Clear params if noun is deselected
-            updateGeneratedCommand();
-        }
-    });
-
     copyCommandButton.addEventListener('click', () => {
+        if(generatedCommandElement.textContent === "Build your command above...") return;
         navigator.clipboard.writeText(generatedCommandElement.textContent)
             .then(() => {
                 copyCommandButton.textContent = '✅ Copied!';
@@ -214,47 +295,32 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(err => console.error('Failed to copy: ', err));
     });
-
-    // Placeholder for piping logic
-    addPipeButton.addEventListener('click', () => {
-        console.log("Add pipe clicked. Piping UI and logic to be implemented.");
-        // Here you would add a new set of verb/noun/param selectors
-        // and append " | " to the generated command.
-        alert("Piping feature is under construction!");
+    
+    addPipeSegmentButton.addEventListener('click', () => {
+        alert("Piping feature is under construction! This would add a new command segment builder.");
+        // For a full implementation, this would involve:
+        // 1. Storing the current commandString.
+        // 2. Resetting currentSelectedVerb, Noun, Cmdlet, Parameters.
+        // 3. Clearing/resetting the UI for Steps 1-3 for a *new* command.
+        // 4. Appending " | " to the stored commandString and then building the new one.
+        // 5. Displaying the full pipeline.
     });
 
-    exampleCards.forEach(card => {
-        const button = card.querySelector('button');
-        button.addEventListener('click', () => {
-            const exampleId = card.dataset.exampleId;
-            loadExampleCommand(exampleId);
+    function setupExampleLoaders() {
+        const exampleCards = document.querySelectorAll('.example-card');
+        exampleCards.forEach(card => {
+            const button = card.querySelector('button');
+            button.addEventListener('click', () => {
+                const exampleId = card.dataset.exampleId;
+                const codeElement = card.querySelector('code');
+                if (codeElement) {
+                    generatedCommandElement.textContent = codeElement.textContent.trim();
+                    copyCommandButton.disabled = false;
+                    alert(`Example loaded into output (display only):\n${codeElement.textContent.trim()}\n\nFull UI population from examples is a future enhancement.`);
+                    // To fully implement: parse command and set UI elements.
+                }
+            });
         });
-    });
-
-    function loadExampleCommand(exampleId) {
-        // This is a very basic example loader.
-        // A real implementation would parse the command and set the UI elements.
-        let cmd = "";
-        switch(exampleId) {
-            case 'file-ops':
-                cmd = "Get-ChildItem -Recurse -File | Format-Table Name, Length";
-                // For a full implementation:
-                // verbSelect.value = "Get"; populateNouns("Get");
-                // nounSelect.value = "ChildItem"; populateParameters("Get-ChildItem");
-                // Check -Recurse, -File. Add pipe. Set Format-Table for pipe.
-                break;
-            case 'data-process':
-                cmd = "Import-Csv -Path 'data.csv' | Where-Object -Property Name -EQ 'Value' | Select-Object -Property Name, Version";
-                break;
-            case 'system-mgmt':
-                cmd = "Get-Process -Name 'chrome' | Stop-Process -Force";
-                break;
-            default:
-                cmd = "Unknown example";
-        }
-        generatedCommandElement.textContent = cmd;
-        copyCommandButton.disabled = false;
-        alert(`Example loaded (display only):\n${cmd}\n\nFull UI population for examples is a future enhancement.`);
     }
 
     // --- Initialize ---
