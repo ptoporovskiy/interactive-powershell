@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Interactive PowerShell V2 Loaded!");
+    console.log("Interactive PowerShell V4 Loaded!");
 
     // --- DOM Elements ---
     const verbList = document.getElementById('verb-list');
@@ -11,18 +11,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const parameterColumn = document.getElementById('parameter-column');
     const pipingColumn = document.getElementById('piping-column');
 
-    const generatedCommandElement = document.getElementById('generated-command');
-    const copyCommandButton = document.getElementById('copy-command');
+    const generatedCommandElement = document.getElementById('sticky-generated-command');
+    const copyCommandButton = document.getElementById('sticky-copy-command');
     const addPipeSegmentButton = document.getElementById('add-pipe-segment-button');
-    // const exampleCards = document.querySelectorAll('.example-card button'); // Corrected selector
 
-    // --- State for the current (first) command segment ---
+    const tooltipElement = document.getElementById('tooltip');
+    const stickyCommandBarWrapper = document.querySelector('.sticky-command-bar-wrapper');
+    const mainContainer = document.querySelector('.container'); // For aligning sticky bar
+
+    // --- State ---
     let currentSelectedVerb = null;
     let currentSelectedNoun = null;
     let currentSelectedCmdlet = null;
-    let currentParameters = {}; // { paramName: { value: '...', type: 'String', selected: true }, ... }
+    let currentParameters = {};
 
-    // --- Data ---
     let cmdletData = {};
     let parameterData = {};
 
@@ -30,11 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
     async function initializeApp() {
         await loadData();
         populateVerbs();
-        updateGeneratedCommand(); // Initial update
-        setupExampleLoaders();
+        updateGeneratedCommand();
+        // setupExampleLoaders(); // Removed
+        adjustStickyBarPosition(); // Initial position
+        window.addEventListener('resize', adjustStickyBarPosition); // Adjust on resize
+        // setupBodyPaddingForStickyBar(); // Adjust body padding
     }
 
-    // --- Data Loading ---
+    // --- Data Loading --- (Same as before)
     async function loadData() {
         try {
             const [cmdletRes, paramRes] = await Promise.all([
@@ -43,15 +48,27 @@ document.addEventListener('DOMContentLoaded', () => {
             ]);
             cmdletData = await cmdletRes.json();
             parameterData = await paramRes.json();
-            console.log("Data loaded:", { cmdletData, parameterData });
         } catch (error) {
             console.error("Failed to load data:", error);
             generatedCommandElement.textContent = "Error: Could not load command data.";
         }
     }
+    
+    // --- Tooltip Logic ---
+    function showTooltip(text, event) {
+        if (!text) return;
+        tooltipElement.textContent = text;
+        tooltipElement.style.left = `${event.clientX + 15}px`; // Offset from cursor
+        tooltipElement.style.top = `${event.clientY + 15}px`;
+        tooltipElement.classList.add('visible');
+    }
 
-    // --- UI Population ---
-    function getCmdletCategoryIcon(verb, noun) {
+    function hideTooltip() {
+        tooltipElement.classList.remove('visible');
+    }
+
+    // --- UI Population (with tooltip event listeners) ---
+    function getCmdletCategoryIcon(verb, noun) { /* ... same as before ... */
         const cmdletName = `${verb}-${noun}`;
         if (cmdletData.categories) {
             for (const categoryKey in cmdletData.categories) {
@@ -61,192 +78,164 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-        // Fallback for verbs if noun not yet selected or cmdlet not categorized
-        if (cmdletData.categories) {
-             for (const categoryKey in cmdletData.categories) {
-                const category = cmdletData.categories[categoryKey];
-                if (category.cmdlets.some(c => c.startsWith(verb + "-"))) { // Looser match for verb
-                    // return category.icon; // Could be too broad
-                }
-            }
-        }
-        return cmdletData.categories?.Other?.icon || "▫️"; // Default icon
+        return cmdletData.categories?.Other?.icon || "▫️";
     }
 
 
     function populateVerbs() {
-        verbList.innerHTML = ''; // Clear previous
-        if (!cmdletData.verbs) {
-            verbList.innerHTML = '<li class="placeholder-item">No verbs loaded</li>';
-            return;
-        }
-
+        verbList.innerHTML = '';
+        if (!cmdletData.verbs) { /* ... */ return; }
         const verbs = Object.keys(cmdletData.verbs).sort();
         verbs.forEach(verb => {
             const li = document.createElement('li');
             li.dataset.value = verb;
-            
+            // ... (icon logic same as before) ...
             const iconSpan = document.createElement('span');
             iconSpan.classList.add('item-icon');
-            // For verbs, icon might be generic or based on common cmdlets for that verb
-            let verbIcon = "▫️"; // Default
-            if (cmdletData.categories) {
-                 // Try to find a representative icon for the verb based on its nouns
-                const typicalNoun = cmdletData.verbs[verb]?.[0];
-                if (typicalNoun) verbIcon = getCmdletCategoryIcon(verb, typicalNoun);
-            }
+            let verbIcon = "▫️";
+            const typicalNoun = cmdletData.verbs[verb]?.[0];
+            if (typicalNoun) verbIcon = getCmdletCategoryIcon(verb, typicalNoun);
             iconSpan.textContent = verbIcon;
-
             li.appendChild(iconSpan);
             li.appendChild(document.createTextNode(verb));
-            
+
             li.addEventListener('click', () => handleVerbSelection(verb, li));
+            li.addEventListener('mouseenter', (e) => {
+                const desc = cmdletData.verbDescriptions?.[verb] || `The '${verb}' verb.`;
+                showTooltip(desc, e);
+            });
+            li.addEventListener('mouseleave', hideTooltip);
             verbList.appendChild(li);
         });
     }
 
-    function handleVerbSelection(verb, selectedLi) {
-        // Visual selection
+    function handleVerbSelection(verb, selectedLi) { /* ... same as before ... */
         verbList.querySelectorAll('li').forEach(item => item.classList.remove('selected'));
         selectedLi.classList.add('selected');
-
         currentSelectedVerb = verb;
-        currentSelectedNoun = null; // Reset noun
+        currentSelectedNoun = null;
         currentSelectedCmdlet = null;
-        currentParameters = {}; // Reset params
-
+        currentParameters = {};
         populateNouns(verb);
-        parameterList.innerHTML = '<li class="placeholder-item">Select a noun first</li>'; // Clear params
-        
+        parameterList.innerHTML = '<li class="placeholder-item">Select a noun first</li>';
         nounColumn.classList.remove('disabled-column');
         parameterColumn.classList.add('disabled-column');
         pipingColumn.classList.add('disabled-column');
         addPipeSegmentButton.disabled = true;
-
         updateGeneratedCommand();
     }
 
-    function populateNouns(selectedVerb) {
-        nounList.innerHTML = ''; // Clear previous
-        if (!selectedVerb || !cmdletData.verbs[selectedVerb]) {
-            nounList.innerHTML = '<li class="placeholder-item">Select a verb first</li>';
-            return;
-        }
 
+    function populateNouns(selectedVerb) {
+        nounList.innerHTML = '';
+        if (!selectedVerb || !cmdletData.verbs[selectedVerb]) { /* ... */ return; }
         const nouns = cmdletData.verbs[selectedVerb].sort();
         nouns.forEach(noun => {
             const li = document.createElement('li');
             li.dataset.value = noun;
-
+            // ... (icon logic same as before) ...
             const iconSpan = document.createElement('span');
             iconSpan.classList.add('item-icon');
             iconSpan.textContent = getCmdletCategoryIcon(selectedVerb, noun);
-            
             li.appendChild(iconSpan);
             li.appendChild(document.createTextNode(noun));
 
             li.addEventListener('click', () => handleNounSelection(noun, li));
+            li.addEventListener('mouseenter', (e) => {
+                const cmdletName = `${selectedVerb}-${noun}`;
+                const desc = parameterData.cmdlets[cmdletName]?.description || `Cmdlet: ${cmdletName}`;
+                showTooltip(desc, e);
+            });
+            li.addEventListener('mouseleave', hideTooltip);
             nounList.appendChild(li);
         });
     }
-
-    function handleNounSelection(noun, selectedLi) {
+    
+    function handleNounSelection(noun, selectedLi) { /* ... same as before ... */
         nounList.querySelectorAll('li').forEach(item => item.classList.remove('selected'));
         selectedLi.classList.add('selected');
-
         currentSelectedNoun = noun;
         currentSelectedCmdlet = `${currentSelectedVerb}-${currentSelectedNoun}`;
-        currentParameters = {}; // Reset params
-
+        currentParameters = {};
         populateParameters(currentSelectedCmdlet);
         parameterColumn.classList.remove('disabled-column');
         pipingColumn.classList.remove('disabled-column');
         addPipeSegmentButton.disabled = false;
-
         updateGeneratedCommand();
     }
 
+
     function populateParameters(cmdletName) {
-        parameterList.innerHTML = ''; // Clear previous
-        currentParameters = {}; // Reset internal state
-
+        parameterList.innerHTML = '';
+        currentParameters = {};
         if (!cmdletName || !parameterData.cmdlets[cmdletName] || !parameterData.cmdlets[cmdletName].parameters) {
-            parameterList.innerHTML = `<li class="placeholder-item">No parameters for ${cmdletName}, or cmdlet not found.</li>`;
-            updateGeneratedCommand();
-            return;
+            parameterList.innerHTML = `<li class="placeholder-item">No parameters for ${cmdletName}.</li>`;
+            updateGeneratedCommand(); return;
         }
-
         const params = parameterData.cmdlets[cmdletName].parameters;
         Object.entries(params).forEach(([paramName, paramDetails]) => {
             const li = document.createElement('li');
+            // ... (li setup same as before) ...
             li.dataset.paramName = paramName;
-
             const label = document.createElement('label');
             label.classList.add('parameter-item-label');
-
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.classList.add('parameter-checkbox');
             checkbox.id = `param-check-${paramName}`;
             checkbox.dataset.paramName = paramName;
-
             const nameSpan = document.createElement('span');
             nameSpan.classList.add('parameter-name');
             nameSpan.textContent = paramName;
-            
             const typeSpan = document.createElement('span');
             typeSpan.classList.add('parameter-type');
-            typeSpan.textContent = `(${paramDetails.type.replace('System.Management.Automation.', '')})`; // Shorten type
-
+            typeSpan.textContent = `(${paramDetails.type.replace('System.Management.Automation.', '')})`;
             label.appendChild(checkbox);
             label.appendChild(nameSpan);
             label.appendChild(typeSpan);
             li.appendChild(label);
-            
             currentParameters[paramName] = { selected: false, value: '', type: paramDetails.type };
-
+            let inputField = null; 
             if (paramDetails.type !== "SwitchParameter" && paramDetails.type !== "System.Management.Automation.SwitchParameter") {
                 const input = document.createElement('input');
                 input.type = 'text';
+                // ... (input setup same as before) ...
                 input.classList.add('parameter-input');
                 input.placeholder = paramDetails.placeholder || `Enter ${paramDetails.type}`;
                 input.dataset.paramName = paramName;
-                // input.disabled = true; // Input starts hidden by CSS, enabled by class
                 li.appendChild(input);
-
+                inputField = input; 
                 input.addEventListener('input', (e) => {
                     currentParameters[paramName].value = e.target.value;
                     updateGeneratedCommand();
                 });
             }
             
-            // Click on the entire list item toggles the checkbox
-            li.addEventListener('click', (e) => {
-                // Prevent toggling if click was directly on input field or checkbox itself
-                if (e.target !== input && e.target !== checkbox) {
+            li.addEventListener('click', (e) => { /* ... same as before ... */
+                if (e.target !== inputField && e.target !== checkbox) { 
                     checkbox.checked = !checkbox.checked;
-                    // Manually trigger change event for checkbox
                     checkbox.dispatchEvent(new Event('change', { bubbles: true }));
                 }
             });
-
-
-            checkbox.addEventListener('change', (e) => {
+            checkbox.addEventListener('change', (e) => { /* ... same as before ... */
                 const isChecked = e.target.checked;
                 currentParameters[paramName].selected = isChecked;
                 li.classList.toggle('has-value-selected', isChecked && (paramDetails.type !== "SwitchParameter" && paramDetails.type !== "System.Management.Automation.SwitchParameter"));
-                li.classList.toggle('selected', isChecked); // General selected style
-                // if (input) input.disabled = !isChecked;
+                li.classList.toggle('selected', isChecked);
                 updateGeneratedCommand();
             });
 
+            li.addEventListener('mouseenter', (e) => {
+                showTooltip(paramDetails.description || `Parameter: ${paramName}`, e);
+            });
+            li.addEventListener('mouseleave', hideTooltip);
             parameterList.appendChild(li);
         });
         updateGeneratedCommand();
     }
 
-    // --- Command Logic ---
-    function updateGeneratedCommand() {
+    // --- Command Logic --- (Same as before)
+    function updateGeneratedCommand() { /* ... same as before ... */
         let commandString = "";
         if (currentSelectedCmdlet) {
             commandString = currentSelectedCmdlet;
@@ -259,10 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         activeParams.push(`-${paramName}`);
                     } else {
                         let value = paramState.value.trim();
-                        if (value === '' && paramDetails.type !== "SwitchParameter") {
-                             // activeParams.push(`-${paramName} <value>`); // Indicate value needed
-                             // For now, don't add param if value is empty and not a switch
-                        } else {
+                        if (value !== '') {
                             if (value.includes(' ') && !((value.startsWith("'") && value.endsWith("'")) || (value.startsWith('"') && value.endsWith('"')))) {
                                 value = `'${value}'`;
                             }
@@ -275,7 +261,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 commandString += " " + activeParams.join(" ");
             }
         }
-
         if (commandString) {
             generatedCommandElement.textContent = commandString;
             copyCommandButton.disabled = false;
@@ -283,45 +268,45 @@ document.addEventListener('DOMContentLoaded', () => {
             generatedCommandElement.textContent = "Build your command above...";
             copyCommandButton.disabled = true;
         }
+        // Adjust body padding for sticky bar after command updates (height might change)
+        // setupBodyPaddingForStickyBar();
     }
 
+    // --- Sticky Bar Positioning & Body Padding ---
+    function adjustStickyBarPosition() {
+        if (mainContainer && stickyCommandBarWrapper) {
+            const containerRect = mainContainer.getBoundingClientRect();
+            stickyCommandBarWrapper.style.left = `${containerRect.left}px`;
+            stickyCommandBarWrapper.style.width = `${containerRect.width}px`;
+        }
+        // setupBodyPaddingForStickyBar(); // Also adjust padding on resize
+    }
+
+    // This function dynamically adjusts body padding to prevent content from being hidden by the sticky bar.
+    // Could be further refined, e.g., using ResizeObserver on the sticky bar itself.
+    // For now, using a static padding in CSS as fallback is simpler.
+    // function setupBodyPaddingForStickyBar() {
+    //     const barHeight = stickyCommandBarWrapper.offsetHeight;
+    //     document.body.style.paddingBottom = `${barHeight + 20}px`; // 20px buffer
+    // }
+
+
     // --- Event Listeners ---
-    copyCommandButton.addEventListener('click', () => {
+    copyCommandButton.addEventListener('click', () => { /* ... same as before ... */
         if(generatedCommandElement.textContent === "Build your command above...") return;
         navigator.clipboard.writeText(generatedCommandElement.textContent)
             .then(() => {
                 copyCommandButton.textContent = '✅ Copied!';
-                setTimeout(() => copyCommandButton.textContent = '📋 Copy Command', 2000);
+                setTimeout(() => copyCommandButton.textContent = '📋 Copy', 2000);
             })
             .catch(err => console.error('Failed to copy: ', err));
     });
     
     addPipeSegmentButton.addEventListener('click', () => {
-        alert("Piping feature is under construction! This would add a new command segment builder.");
-        // For a full implementation, this would involve:
-        // 1. Storing the current commandString.
-        // 2. Resetting currentSelectedVerb, Noun, Cmdlet, Parameters.
-        // 3. Clearing/resetting the UI for Steps 1-3 for a *new* command.
-        // 4. Appending " | " to the stored commandString and then building the new one.
-        // 5. Displaying the full pipeline.
+        alert("Piping feature is under construction!");
     });
 
-    function setupExampleLoaders() {
-        const exampleCards = document.querySelectorAll('.example-card');
-        exampleCards.forEach(card => {
-            const button = card.querySelector('button');
-            button.addEventListener('click', () => {
-                const exampleId = card.dataset.exampleId;
-                const codeElement = card.querySelector('code');
-                if (codeElement) {
-                    generatedCommandElement.textContent = codeElement.textContent.trim();
-                    copyCommandButton.disabled = false;
-                    alert(`Example loaded into output (display only):\n${codeElement.textContent.trim()}\n\nFull UI population from examples is a future enhancement.`);
-                    // To fully implement: parse command and set UI elements.
-                }
-            });
-        });
-    }
+    // function setupExampleLoaders() { /* REMOVED */ }
 
     // --- Initialize ---
     initializeApp();

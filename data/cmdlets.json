@@ -4,28 +4,58 @@
         "Set": ["Item", "Location"],
         "New": ["Item", "Object"],
         "Import": ["Csv", "Module"],
-        "Export": ["Csv"],
+        "Export": ["Csv", "CliXml"],
         "Format": ["List", "Table", "Wide"],
         "Select": ["Object"],
         "Where": ["Object"],
         "Stop": ["Process", "Service"],
-        "Start": ["Process", "Service"]
+        "Start": ["Process", "Service"],
+        "Out": ["File", "String"],
+        "ConvertTo": ["Json", "Html", "Xml", "Csv"] 
+    },
+    "verbDescriptions": {
+        "Get": "Retrieves resources or information.",
+        "Set": "Modifies existing resources.",
+        "New": "Creates new resources.",
+        "Import": "Brings data into PowerShell.",
+        "Export": "Sends data out of PowerShell (often to a file with formatting).",
+        "Format": "Changes the display format of output (usually for console).",
+        "Select": "Picks specific properties or objects.",
+        "Where": "Filters objects based on conditions.",
+        "Stop": "Halts running processes or services.",
+        "Start": "Initiates processes or services.",
+        "Out": "Sends output to a specified destination, like a file or the console.",
+        "ConvertTo": "Transforms objects into a different data format (e.g., JSON, HTML, XML)."
     },
     "categories": {
         "File Operations": {
             "icon": "📁",
-            "cmdlets": ["Get-ChildItem", "Get-Content", "Get-Item", "Set-Item", "New-Item"]
+            "description": "Cmdlets for working with files and directories.",
+            "cmdlets": ["Get-ChildItem", "Get-Content", "Get-Item", "Set-Item", "New-Item", "Out-File"]
         },
         "Data Processing": {
             "icon": "📊",
-            "cmdlets": ["Import-Csv", "Export-Csv", "Format-List", "Format-Table", "Format-Wide", "Select-Object", "Where-Object"]
+            "description": "Cmdlets for manipulating and formatting data.",
+            "cmdlets": [
+                "Import-Csv", "Export-Csv", "Export-CliXml",
+                "Format-List", "Format-Table", "Format-Wide",
+                "Select-Object", "Where-Object",
+                "ConvertTo-Json", "ConvertTo-Html", "ConvertTo-Xml", "ConvertTo-Csv",
+                "Out-String"
+            ]
         },
         "System Management": {
             "icon": "⚙️",
-            "cmdlets": ["Get-Process", "Stop-Process", "Start-Process", "Get-Service", "Stop-Service", "Start-Service", "Get-Command", "Get-Help", "New-Object"]
+            "description": "Cmdlets for managing system processes, services, and configuration.",
+            "cmdlets": [
+                "Get-Process", "Stop-Process", "Start-Process",
+                "Get-Service", "Stop-Service", "Start-Service",
+                "Get-Command", "Get-Help", "New-Object"
+            ]
         },
         "Other": {
             "icon": "🔧",
+            "description": "Miscellaneous cmdlets.",
             "cmdlets": ["Get-Date", "Set-Location"]
         }
     }

@@ -13,10 +13,11 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    /* padding-bottom will be handled by the static rule at the end or dynamically if re-enabled */
 }
 
 .container {
-    max-width: 1400px; /* Increased max-width for horizontal layout */
+    max-width: 1400px;
     margin: 20px auto;
     padding: 20px;
     flex-grow: 1;
@@ -30,9 +31,9 @@ header {
 }
 
 header h1 {
-    color: #4fc3f7; /* Light blue for PowerShell-like feel */
+    color: #4fc3f7;
     margin-bottom: 10px;
-    font-size: 2.2rem; /* Slightly reduced */
+    font-size: 2.2rem;
 }
 .header-icon {
     margin-right: 10px;
@@ -54,48 +55,60 @@ header p {
 
 .steps-horizontal-container {
     display: flex;
-    gap: 20px; /* Space between columns */
     margin-bottom: 20px;
+    border-radius: 6px;
 }
 
 .step-column {
     background-color: #2d2d2d;
     border: 1px solid #3a3a3a;
-    border-radius: 6px;
-    padding: 15px;
-    flex: 1; /* Distribute space equally */
-    min-width: 250px; /* Minimum width for readability */
+    padding: 5px; /* Reduced internal padding */
+    flex: 1;
+    min-width: 250px;
     display: flex;
     flex-direction: column;
+    border-radius: 0;
+}
+.step-column + .step-column {
+    border-left: none;
+}
+.steps-horizontal-container .step-column:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+.steps-horizontal-container .step-column:last-child {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
 }
 
 .step-column h2 {
     color: #4fc3f7;
     font-size: 1.1rem;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
     border-bottom: 1px solid #3f3f3f;
     text-align: center;
 }
 
 .step-column.disabled-column {
     opacity: 0.5;
-    pointer-events: none; /* Prevent interaction */
+    pointer-events: none;
     filter: grayscale(50%);
 }
-.step-column.disabled-column .selectable-list-container {
-    border-color: #333;
-}
-
 
 .selectable-list-container {
-    flex-grow: 1; /* Allow list to take available vertical space */
-    overflow-y: auto; /* Add scroll for long lists */
-    max-height: 400px; /* Limit height */
+    flex-grow: 1;
+    overflow-y: auto;
+    max-height: 400px;
     border: 1px solid #383838;
     border-radius: 4px;
     padding: 5px;
     background-color: #202020;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.selectable-list-container::-webkit-scrollbar {
+    display: none;
 }
 
 .selectable-list {
@@ -107,34 +120,33 @@ header p {
     padding: 10px;
     text-align: center;
     font-style: italic;
-    opacity: 1 !important; /* Override general opacity for placeholder */
+    opacity: 1 !important;
     border: none !important;
 }
-
 
 .selectable-list li {
     background-color: #333333;
     color: #ccc;
-    padding: 10px 12px;
-    margin-bottom: 6px;
-    border-radius: 4px;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    border-radius: 3px;
     cursor: pointer;
-    opacity: 0.6; /* Initial 50% transparency (use opacity as it's simpler) */
-    border: 3px solid transparent; /* For hover effect without layout shift */
+    opacity: 0.6;
+    border: 3px solid transparent;
     transition: opacity 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
-    display: flex; /* For icon alignment */
+    display: flex;
     align-items: center;
 }
 
 .selectable-list li:hover {
     opacity: 1;
-    border-color: #4fc3f7; /* Highlight border */
+    border-color: #4fc3f7;
     background-color: #3c3c3c;
 }
 
 .selectable-list li.selected {
     opacity: 1;
-    background-color: #005a9e; /* Selected background */
+    background-color: #005a9e;
     color: #fff;
     border-color: #007acc;
     font-weight: bold;
@@ -145,29 +157,28 @@ header p {
 
 .item-icon {
     margin-right: 8px;
-    opacity: 0.5; /* Icons 50% transparent */
+    opacity: 0.5;
     font-size: 0.9em;
 }
 .selectable-list li.selected .item-icon {
     opacity: 0.8;
 }
 
-
 /* Parameter Specific Styling */
 .parameter-items-list li {
-    flex-direction: column; /* Stack checkbox/label and input */
+    flex-direction: column;
     align-items: flex-start;
 }
 
 .parameter-item-label {
     display: flex;
     align-items: center;
-    width: 100%; /* Take full width */
+    width: 100%;
     cursor: pointer;
 }
 
 .parameter-checkbox {
-    margin-right: 10px;
+    margin-right: 8px;
     accent-color: #4fc3f7;
     width: 16px;
     height: 16px;
@@ -186,14 +197,13 @@ header p {
     color: #ddd;
 }
 
-
 .parameter-input {
-    width: calc(100% - 10px); /* Full width minus padding */
-    margin-top: 8px;
+    width: calc(100% - 8px);
+    margin-top: 6px;
     background-color: #2a2a2a;
     border: 1px solid #444;
-    border-radius: 4px;
-    padding: 8px;
+    border-radius: 3px;
+    padding: 6px;
     color: #d4d4d4;
     font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
 }
@@ -204,12 +214,11 @@ header p {
     cursor: not-allowed;
 }
 .selectable-list li:not(.has-value-selected) .parameter-input {
-    display: none; /* Hide input if parameter not selected or doesn't take value */
+    display: none;
 }
 .selectable-list li.has-value-selected .parameter-input {
     display: block;
 }
-
 
 /* Piping Section */
 .piping-section-container {
@@ -217,7 +226,7 @@ header p {
     background-color: #2d2d2d;
     border: 1px solid #3a3a3a;
     border-radius: 6px;
-    padding: 20px;
+    padding: 15px;
 }
 .piping-section-container.disabled-column {
     opacity: 0.5;
@@ -227,7 +236,7 @@ header p {
 .piping-section-container h2 {
     color: #4fc3f7;
     font-size: 1.1rem;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 .optional-text {
     font-size: 0.85rem;
@@ -239,8 +248,8 @@ header p {
     background-color: #3c3c3c;
     color: #d4d4d4;
     border: 1px solid #555;
-    padding: 10px 15px;
-    border-radius: 5px;
+    padding: 8px 12px;
+    border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s, border-color 0.2s;
 }
@@ -253,150 +262,138 @@ header p {
     cursor: not-allowed;
 }
 
-
-/* Output Section */
-.output-section {
-    background-color: #202020;
-    border-radius: 8px;
-    padding: 25px;
-    margin-bottom: 30px;
+/* Tooltip Styles */
+.tooltip-popup {
+    position: fixed;
+    background-color: #222;
+    color: #ddd;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease-in-out;
+    max-width: 300px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    line-height: 1.4;
+}
+.tooltip-popup.visible {
+    opacity: 0.9;
 }
 
-.output-section h3 {
-    color: #4fc3f7;
-    margin-bottom: 10px;
-}
-
-.command-output {
-    background-color: #1a1a1a;
-    border-radius: 6px;
-    padding: 15px 20px;
-    margin: 15px 0;
-    border-left: 4px solid #4fc3f7;
-    min-height: 50px;
+/* Sticky Command Bar Styles */
+.sticky-command-bar-wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
     display: flex;
-    align-items: center;
+    justify-content: center;
+    pointer-events: none;
 }
 
-.command-output code {
+.sticky-command-bar {
+    width: 100%;
+    max-width: 1400px; /* Should match .container max-width */
+    background-color: #181818;
+    border-top: 1px solid #383838;
+    padding: 0 15px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    z-index: 1000;
+    min-height: 50px;
+    pointer-events: all;
+    margin: 0 auto;
+}
+
+.sticky-command-bar code {
     color: #9cdcfe;
+    font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
     font-size: 1rem;
     line-height: 1.5;
-    word-break: break-all;
+    padding: 10px 0;
+    flex-grow: 1;
     white-space: pre-wrap;
+    word-break: break-all;
+    margin-right: 15px;
 }
 
-#copy-command {
+.sticky-command-bar button {
     background-color: #007acc;
     color: #ffffff;
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 8px 15px;
+    border-radius: 4px;
     font-weight: 600;
     cursor: pointer;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    line-height: normal;
+    align-self: center;
 }
-#copy-command:hover:not(:disabled) {
+.sticky-command-bar button:hover:not(:disabled) {
     background-color: #005a9e;
 }
-#copy-command:disabled {
-     opacity: 0.5; cursor: not-allowed;
-}
-
-/* Examples Section */
-.examples-section h2 {
-    color: #4fc3f7;
-    margin-bottom: 20px;
-    text-align: center;
-}
-.category-icon {
-    margin-right: 8px;
-}
-
-.examples-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-}
-
-.example-card {
-    background-color: #2d2d2d;
-    border-radius: 8px;
-    padding: 20px;
-    text-align: left;
-    border: 1px solid #444;
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.example-card:hover {
-    border-color: #4fc3f7;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(79, 195, 247, 0.1);
-}
-
-.example-card h3 {
-    color: #4fc3f7;
-    margin-bottom: 12px;
-    font-size: 1.2rem;
-}
-
-.example-card code {
-    display: block;
-    background-color: #1a1a1a;
-    padding: 10px 15px;
-    border-radius: 6px;
-    margin: 10px 0;
-    color: #9cdcfe;
-    font-size: 0.9rem;
-    white-space: pre-wrap;
-    word-break: break-all;
-}
-
-.example-card button {
-    background-color: #3c3c3c;
-    border: 1px solid #555;
-    padding: 8px 16px;
-    margin-top: 15px;
-    align-self: flex-start;
-    color: #d4d4d4;
-    border-radius: 5px;
-}
-
-.example-card button:hover:not(:disabled) {
-    background-color: #4fc3f7;
-    color: #1e1e1e;
-    border-color: #4fc3f7;
+.sticky-command-bar button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* Responsive Adjustments */
-@media (max-width: 992px) { /* Tablet and below */
+@media (max-width: 992px) {
     .steps-horizontal-container {
-        flex-direction: column; /* Stack columns vertically */
+        flex-direction: column;
+    }
+    .steps-horizontal-container .step-column:first-child,
+    .steps-horizontal-container .step-column:last-child {
+        border-radius: 6px;
+    }
+    .step-column + .step-column {
+        border-left: 1px solid #3a3a3a;
+        margin-left: 0;
+        margin-top: -1px;
     }
     .step-column {
-        min-width: auto; /* Allow columns to shrink */
+        min-width: auto;
     }
     .selectable-list-container {
-        max-height: 250px; /* Reduce height on smaller screens */
+        max-height: 250px;
     }
 }
 
-@media (max-width: 768px) { /* Mobile */
+@media (max-width: 768px) {
     .container {
         padding: 10px;
     }
     header h1 {
         font-size: 1.8rem;
     }
-    .examples-grid {
-        grid-template-columns: 1fr;
+
+    .sticky-command-bar {
+        padding: 0 10px;
+        min-height: 45px;
     }
-    .command-output code {
+    .sticky-command-bar code {
         font-size: 0.9rem;
+        padding: 8px 0;
     }
-    .step-column h2, .piping-section-container h2, .output-section h3, .examples-section h2 {
+    .sticky-command-bar button {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        margin-top: 6px;
+        margin-bottom: 6px;
+    }
+    .step-column h2, .piping-section-container h2 { /* Removed .examples-section h2 */
         font-size: 1rem;
     }
+}
+
+/* Ensure body padding accommodates sticky bar height if JS doesn't do it or as fallback */
+body {
+    padding-bottom: 70px; /* Approximate initial height + buffer */
 }

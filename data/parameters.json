@@ -1,8 +1,9 @@
 {
     "cmdlets": {
         "Get-ChildItem": {
+            "description": "Gets the items and child items in one or more specified locations. Commonly used to list files and folders.",
             "parameters": {
-                "Path": { "type": "String", "placeholder": "C:\\Path\\To\\Folder", "description": "Specifies a path to one or more locations." },
+                "Path": { "type": "String", "placeholder": "C:\\Path\\To\\Folder", "description": "Specifies a path to one or more locations. Wildcards are permitted." },
                 "Recurse": { "type": "SwitchParameter", "description": "Gets the items in the specified locations and in all child items of the locations." },
                 "File": { "type": "SwitchParameter", "description": "Gets files." },
                 "Directory": { "type": "SwitchParameter", "description": "Gets directories." },
@@ -10,58 +11,69 @@
                 "Include": { "type": "String[]", "placeholder": "*.log,*.tmp", "description": "Specifies items that this cmdlet gets." },
                 "Exclude": { "type": "String[]", "placeholder": "*.dll,*.exe", "description": "Specifies items that this cmdlet omits." },
                 "Force": { "type": "SwitchParameter", "description": "Allows the cmdlet to get items that can't otherwise be accessed, such as hidden or system files." }
-            },
-            "description": "Gets the items and child items in one or more specified locations."
+            }
         },
         "Get-Process": {
+            "description": "Gets the processes that are running on the local computer.",
             "parameters": {
                 "Name": { "type": "String[]", "placeholder": "chrome,powershell", "description": "Specifies one or more processes by process name." },
                 "Id": { "type": "Int32[]", "placeholder": "1234,5678", "description": "Specifies one or more processes by process ID (PID)." }
-            },
-            "description": "Gets the processes that are running on the local computer."
+            }
         },
         "Stop-Process": {
+            "description": "Stops one or more running processes.",
             "parameters": {
                 "Name": { "type": "String[]", "placeholder": "notepad", "description": "Specifies the names of one or more processes to stop." },
                 "Id": { "type": "Int32[]", "placeholder": "1234", "description": "Specifies the process IDs of one or more processes to stop." },
                 "Force": { "type": "SwitchParameter", "description": "Forces the cmdlet to stop the specified processes without prompting for confirmation." },
                 "PassThru": { "type": "SwitchParameter", "description": "Returns an object representing the item with which you are working." }
-            },
-            "description": "Stops one or more running processes."
+            }
         },
         "Format-Table": {
+            "description": "Formats the output as a table.",
             "parameters": {
                 "Property": { "type": "Object[]", "placeholder": "Name, Id, CPU", "description": "Specifies the properties to display." },
                 "AutoSize": { "type": "SwitchParameter", "description": "Adjusts the column size and number of columns based on the width of the data." },
                 "Wrap": { "type": "SwitchParameter", "description": "Displays text that exceeds the column width on the next line." }
-            },
-            "description": "Formats the output as a table."
+            }
         },
         "Format-List": {
+            "description": "Formats the output as a list of properties for each object.",
             "parameters": {
                 "Property": { "type": "Object[]", "placeholder": "*", "description": "Specifies the properties to display in a list." }
-            },
-            "description": "Formats the output as a list of properties for each object."
+            }
         },
         "Import-Csv": {
+            "description": "Creates table-like custom objects from the items in a CSV file.",
             "parameters": {
                 "Path": { "type": "String", "placeholder": "data.csv", "description": "Specifies the path to the CSV file to import." },
                 "Delimiter": { "type": "Char", "placeholder": ",", "description": "Specifies the delimiter that separates the property values." },
                 "Header": { "type": "String[]", "placeholder": "Name,Age", "description": "Specifies an alternate column header row for the imported file." }
-            },
-            "description": "Creates table-like custom objects from the items in a CSV file."
+            }
+        },
+        "Export-Csv": {
+            "description": "Converts objects into a series of comma-separated value (CSV) strings and saves them in a CSV file.",
+            "parameters": {
+                "Path": { "type": "String", "placeholder": "export.csv", "description": "Specifies the path to the output CSV file." },
+                "NoTypeInformation": { "type": "SwitchParameter", "description": "Omits the #TYPE information header from the output." },
+                "Delimiter": { "type": "Char", "placeholder": ",", "description": "Specifies the delimiter to separate the property values." },
+                "Append": { "type": "SwitchParameter", "description": "Adds the CSV output to the end of the specified file." },
+                "Force": { "type": "SwitchParameter", "description": "Allows the cmdlet to overwrite an existing read-only file." },
+                "Encoding": { "type": "String", "placeholder": "utf8", "description": "Specifies the character encoding for the output file (e.g., utf8, unicode, ascii)." }
+            }
         },
         "Select-Object": {
+            "description": "Selects specified properties of an object or set of objects.",
              "parameters": {
                 "Property": { "type": "Object[]", "placeholder": "Name,Version", "description": "Specifies the properties to select." },
                 "ExcludeProperty": { "type": "String[]", "placeholder": "ComputerName", "description": "Specifies properties to exclude." },
                 "First": { "type": "Int32", "placeholder": "5", "description": "Selects the specified number of objects from the beginning of an array." },
                 "Last": { "type": "Int32", "placeholder": "5", "description": "Selects the specified number of objects from the end of an array." },
                 "Unique": { "type": "SwitchParameter", "description": "Selects unique objects from an array." }
-            },
-            "description": "Selects specified properties of an object or set of objects."
+            }
         },
         "Where-Object": {
+            "description": "Selects objects from a collection based on their property values.",
             "parameters": {
                 "Property": { "type": "String", "placeholder": "Name", "description": "Specifies a property to test." },
                 "Value": { "type": "Object", "placeholder": "'notepad'", "description": "Specifies the value for which the property is tested." },
@@ -70,8 +82,69 @@
                 "GT": { "type": "SwitchParameter", "description": "Operator: Greater than." },
                 "LT": { "type": "SwitchParameter", "description": "Operator: Less than." },
                 "Like": { "type": "SwitchParameter", "description": "Operator: Wildcard match." }
-            },
-            "description": "Selects objects from a collection based on their property values."
+            }
+        },
+        "Out-File": {
+            "description": "Sends output to a file. It can be used to save command output just as it appears in the console.",
+            "parameters": {
+                "FilePath": { "type": "String", "placeholder": "output.txt", "description": "Specifies the path to the output file." },
+                "Encoding": { "type": "String", "placeholder": "utf8", "description": "Specifies the file encoding (e.g., utf8, unicode, ascii, bigendianunicode, utf7, utf32)." },
+                "Append": { "type": "SwitchParameter", "description": "Adds the output to the end of an existing file instead of overwriting it." },
+                "Force": { "type": "SwitchParameter", "description": "Overrides restrictions that prevent the command from succeeding, such as overwriting a read-only file." },
+                "NoNewline": { "type": "SwitchParameter", "description": "Omits the final newline character from the string output." },
+                "Width": { "type": "Int32", "placeholder": "80", "description": "Specifies the line width for the output. Text exceeding this width may be truncated or wrapped depending on the object." }
+            }
+        },
+        "Out-String": {
+            "description": "Converts objects into strings. Often used to capture formatted output as a string variable.",
+            "parameters": {
+                "Width": { "type": "Int32", "placeholder": "80", "description": "Specifies the width of the string. If the object has multiple properties, they're arranged in columns." },
+                "Stream": { "type": "SwitchParameter", "description": "Sends the strings as a stream. Each string is sent separately instead of one large string." }
+            }
+        },
+        "Export-CliXml": {
+            "description": "Creates an XML-based representation of an object or objects. Useful for storing objects and re-importing them later with Import-CliXml.",
+            "parameters": {
+                "Path": { "type": "String", "placeholder": "data.clixml", "description": "Specifies the path to the output XML file." },
+                "Depth": { "type": "Int32", "placeholder": "2", "description": "Specifies how many levels of contained objects are included in the XML representation." },
+                "Force": { "type": "SwitchParameter", "description": "Allows the cmdlet to overwrite an existing read-only file." },
+                "NoClobber": { "type": "SwitchParameter", "description": "Prevents overwriting an existing file. By default, if a file exists in the specified path, Export-CliXml overwrites the file without warning." }
+            }
+        },
+        "ConvertTo-Json": {
+            "description": "Converts an object to a JSON-formatted string. Useful for web APIs and data interchange.",
+            "parameters": {
+                "Depth": { "type": "Int32", "placeholder": "2", "description": "Specifies how many levels of contained objects are included in the JSON representation." },
+                "Compress": { "type": "SwitchParameter", "description": "Omits white space and indented formatting from the JSON string." },
+                "AsArray": { "type": "SwitchParameter", "description": "Forces the output to be an array, even for a single input object." }
+            }
+        },
+        "ConvertTo-Html": {
+            "description": "Converts Microsoft .NET Framework objects into HTML that can be displayed in a Web browser.",
+            "parameters": {
+                "Property": { "type": "Object[]", "placeholder": "Name, Status", "description": "Specifies the object properties to include in the HTML. Wildcards are permitted." },
+                "Head": { "type": "String[]", "placeholder": "<title>Report</title>", "description": "Specifies content for the HTML <head> tag (e.g., title, CSS links)." },
+                "Body": { "type": "String[]", "placeholder": "<h1>Service Report</h1>", "description": "Specifies content to be placed in the HTML <body> tag before or after the object data." },
+                "Title": { "type": "String", "placeholder": "My HTML Report", "description": "Specifies a title for the HTML page." },
+                "As": { "type": "String", "placeholder": "Table", "description": "Specifies the output format (Table or List). Default is Table." },
+                "CssUri": { "type": "String", "placeholder": "style.css", "description": "Specifies the URI of a CSS stylesheet to apply to the HTML." }
+            }
+        },
+        "ConvertTo-Xml": {
+            "description": "Creates an XML-based representation of an object. This is a more generic XML than CliXml.",
+            "parameters": {
+                "Depth": { "type": "Int32", "placeholder": "2", "description": "Specifies how many levels of contained objects are included in the XML representation." },
+                "As": { "type": "String", "placeholder": "String", "description": "Determines the output format (String, Document, or Stream)." },
+                "NoTypeInformation": { "type": "SwitchParameter", "description": "Omits the type information from the XML output." }
+            }
+        },
+        "ConvertTo-Csv": {
+            "description": "Converts objects into a series of character-separated value (CSV) strings. Does not save to file directly.",
+            "parameters": {
+                 "Delimiter": { "type": "Char", "placeholder": ",", "description": "Specifies the delimiter to separate the property values." },
+                 "NoTypeInformation": { "type": "SwitchParameter", "description": "Omits the #TYPE information header from the output." },
+                 "UseCulture": { "type": "SwitchParameter", "description": "Uses the list separator for the current culture as the item delimiter." }
+            }
         }
     }
 }
