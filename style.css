@@ -1,0 +1,290 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1e1e1e; /* Dark background */
+    color: #d4d4d4; /* Light grey text */
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    flex-grow: 1;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+header h1 {
+    color: #4fc3f7; /* Light blue for PowerShell-like feel */
+    margin-bottom: 10px;
+    font-size: 2.5rem;
+}
+
+header p {
+    color: #a0a0a0;
+    font-size: 1.1rem;
+}
+
+.builder-section, .examples-section {
+    background-color: #252526; /* Slightly lighter dark for sections */
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.step {
+    margin-bottom: 20px;
+}
+
+.step label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #4fc3f7;
+}
+
+select, input[type="text"], button {
+    background-color: #3c3c3c; /* Darker input background */
+    color: #d4d4d4;
+    border: 1px solid #555;
+    border-radius: 5px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    width: 100%; /* Make selects and inputs full width of their container */
+    margin-top: 5px;
+}
+
+button {
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    width: auto; /* Buttons shouldn't always be full width */
+    padding: 10px 20px;
+}
+
+
+select:hover, input[type="text"]:hover, button:hover:not(:disabled) {
+    background-color: #4a4a4a;
+    border-color: #4fc3f7;
+}
+
+select:focus, input[type="text"]:focus {
+    outline: none;
+    border-color: #4fc3f7;
+    box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.3);
+}
+
+select:disabled, input[type="text"]:disabled, button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #333;
+}
+
+.parameters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.parameter-item {
+    background-color: #333333;
+    border-radius: 6px;
+    padding: 15px;
+    border: 1px solid #4a4a4a;
+    display: flex;
+    flex-direction: column;
+}
+
+.parameter-item label { /* For checkbox labels */
+    color: #d4d4d4;
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.parameter-checkbox {
+    margin-right: 10px;
+    accent-color: #4fc3f7; /* Style checkbox color */
+    width: 18px;
+    height: 18px;
+}
+
+.parameter-input {
+    width: calc(100% - 24px); /* Adjust width based on padding */
+    margin-top: 8px;
+    background-color: #2d2d2d; /* Even darker for input fields within params */
+}
+
+.parameter-item.selected {
+    border-color: #4fc3f7;
+    background-color: #2a2a35; /* Slightly different background for selected */
+}
+
+.output-section {
+    background-color: #202020; /* Darker for output section */
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.output-section h3 {
+    color: #4fc3f7;
+    margin-bottom: 10px;
+}
+
+.command-output {
+    background-color: #1a1a1a; /* Very dark for the code block itself */
+    border-radius: 6px;
+    padding: 15px 20px;
+    margin: 15px 0;
+    border-left: 4px solid #4fc3f7;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+}
+
+.command-output code {
+    color: #9cdcfe; /* Light blue for code text, common in dark themes */
+    font-family: 'Consolas', 'Monaco', 'Lucida Console', monospace;
+    font-size: 1rem;
+    line-height: 1.5;
+    word-break: break-all;
+    white-space: pre-wrap; /* Allow wrapping */
+}
+
+#copy-command {
+    background-color: #007acc; /* A common blue for primary actions */
+    color: #ffffff;
+    border: none;
+    font-weight: 600;
+}
+
+#copy-command:hover:not(:disabled) {
+    background-color: #005a9e;
+}
+
+.examples-section h2 {
+    color: #4fc3f7;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.examples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.example-card {
+    background-color: #2d2d2d;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: left; /* Align text left for readability */
+    border: 1px solid #444;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.example-card:hover {
+    border-color: #4fc3f7;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(79, 195, 247, 0.1);
+}
+
+.example-card h3 {
+    color: #4fc3f7;
+    margin-bottom: 12px;
+    font-size: 1.2rem;
+}
+
+.example-card code {
+    display: block;
+    background-color: #1a1a1a;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin: 10px 0;
+    color: #9cdcfe;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.example-card button {
+    background-color: #3c3c3c;
+    border: 1px solid #555;
+    padding: 8px 16px;
+    margin-top: 15px;
+    align-self: flex-start; /* Align button to the start */
+}
+
+.example-card button:hover:not(:disabled) {
+    background-color: #4fc3f7;
+    color: #1e1e1e;
+    border-color: #4fc3f7;
+}
+
+.pipes-container {
+    margin-top: 15px;
+}
+
+.pipe-segment { /* Renamed from .pipe-item for clarity */
+    background-color: #333333;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-left: 3px solid #007acc; /* Blue to indicate a piped segment */
+    position: relative;
+}
+
+.pipe-segment .step { /* Reduce margin for steps within a pipe */
+    margin-bottom: 15px;
+}
+
+.remove-pipe-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #c0392b; /* Red for remove */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 0.9em;
+}
+.remove-pipe-btn:hover {
+    background-color: #a93226;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    header h1 {
+        font-size: 2rem;
+    }
+    .examples-grid, .parameters-grid {
+        grid-template-columns: 1fr; /* Stack on smaller screens */
+    }
+    .command-output code {
+        font-size: 0.9rem;
+    }
+}

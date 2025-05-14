@@ -1,0 +1,48 @@
+{
+    "verbs": {
+        "Get": [
+            "ChildItem",
+            "Process",
+            "Service",
+            "Help",
+            "Command",
+            "Date",
+            "Content",
+            "Item"
+        ],
+        "Set": [
+            "Item",
+            "Location"
+        ],
+        "New": [
+            "Item",
+            "Object"
+        ],
+        "Import": [
+            "Csv",
+            "Module"
+        ],
+        "Export": [
+            "Csv"
+        ],
+        "Format": [
+            "List",
+            "Table",
+            "Wide"
+        ],
+        "Select": [
+            "Object"
+        ],
+        "Where": [
+            "Object"
+        ],
+        "Stop": [
+            "Process",
+            "Service"
+        ],
+        "Start": [
+            "Process",
+            "Service"
+        ]
+    }
+}

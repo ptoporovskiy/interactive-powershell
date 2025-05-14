@@ -1,0 +1,77 @@
+{
+    "cmdlets": {
+        "Get-ChildItem": {
+            "parameters": {
+                "Path": { "type": "String", "placeholder": "C:\\Path\\To\\Folder", "description": "Specifies a path to one or more locations." },
+                "Recurse": { "type": "SwitchParameter", "description": "Gets the items in the specified locations and in all child items of the locations." },
+                "File": { "type": "SwitchParameter", "description": "Gets files." },
+                "Directory": { "type": "SwitchParameter", "description": "Gets directories." },
+                "Filter": { "type": "String", "placeholder": "*.txt", "description": "Specifies a filter in the provider's format or language." },
+                "Include": { "type": "String[]", "placeholder": "*.log,*.tmp", "description": "Specifies items that this cmdlet gets." },
+                "Exclude": { "type": "String[]", "placeholder": "*.dll,*.exe", "description": "Specifies items that this cmdlet omits." },
+                "Force": { "type": "SwitchParameter", "description": "Allows the cmdlet to get items that can't otherwise be accessed, such as hidden or system files." }
+            },
+            "description": "Gets the items and child items in one or more specified locations."
+        },
+        "Get-Process": {
+            "parameters": {
+                "Name": { "type": "String[]", "placeholder": "chrome,powershell", "description": "Specifies one or more processes by process name." },
+                "Id": { "type": "Int32[]", "placeholder": "1234,5678", "description": "Specifies one or more processes by process ID (PID)." }
+            },
+            "description": "Gets the processes that are running on the local computer."
+        },
+        "Stop-Process": {
+            "parameters": {
+                "Name": { "type": "String[]", "placeholder": "notepad", "description": "Specifies the names of one or more processes to stop." },
+                "Id": { "type": "Int32[]", "placeholder": "1234", "description": "Specifies the process IDs of one or more processes to stop." },
+                "Force": { "type": "SwitchParameter", "description": "Forces the cmdlet to stop the specified processes without prompting for confirmation." },
+                "PassThru": { "type": "SwitchParameter", "description": "Returns an object representing the item with which you are working." }
+            },
+            "description": "Stops one or more running processes."
+        },
+        "Format-Table": {
+            "parameters": {
+                "Property": { "type": "Object[]", "placeholder": "Name, Id, CPU", "description": "Specifies the properties to display." },
+                "AutoSize": { "type": "SwitchParameter", "description": "Adjusts the column size and number of columns based on the width of the data." },
+                "Wrap": { "type": "SwitchParameter", "description": "Displays text that exceeds the column width on the next line." }
+            },
+            "description": "Formats the output as a table."
+        },
+        "Format-List": {
+            "parameters": {
+                "Property": { "type": "Object[]", "placeholder": "*", "description": "Specifies the properties to display in a list." }
+            },
+            "description": "Formats the output as a list of properties for each object."
+        },
+        "Import-Csv": {
+            "parameters": {
+                "Path": { "type": "String", "placeholder": "data.csv", "description": "Specifies the path to the CSV file to import." },
+                "Delimiter": { "type": "Char", "placeholder": ",", "description": "Specifies the delimiter that separates the property values." },
+                "Header": { "type": "String[]", "placeholder": "Name,Age", "description": "Specifies an alternate column header row for the imported file." }
+            },
+            "description": "Creates table-like custom objects from the items in a CSV file."
+        },
+        "Select-Object": {
+             "parameters": {
+                "Property": { "type": "Object[]", "placeholder": "Name,Version", "description": "Specifies the properties to select." },
+                "ExcludeProperty": { "type": "String[]", "placeholder": "ComputerName", "description": "Specifies properties to exclude." },
+                "First": { "type": "Int32", "placeholder": "5", "description": "Selects the specified number of objects from the beginning of an array." },
+                "Last": { "type": "Int32", "placeholder": "5", "description": "Selects the specified number of objects from the end of an array." },
+                "Unique": { "type": "SwitchParameter", "description": "Selects unique objects from an array." }
+            },
+            "description": "Selects specified properties of an object or set of objects."
+        },
+        "Where-Object": {
+            "parameters": {
+                "Property": { "type": "String", "placeholder": "Name", "description": "Specifies a property to test." },
+                "Value": { "type": "Object", "placeholder": "'notepad'", "description": "Specifies the value for which the property is tested." },
+                "EQ": { "type": "SwitchParameter", "description": "Operator: Equal." },
+                "NE": { "type": "SwitchParameter", "description": "Operator: Not equal." },
+                "GT": { "type": "SwitchParameter", "description": "Operator: Greater than." },
+                "LT": { "type": "SwitchParameter", "description": "Operator: Less than." },
+                "Like": { "type": "SwitchParameter", "description": "Operator: Wildcard match." }
+            },
+            "description": "Selects objects from a collection based on their property values."
+        }
+    }
+}

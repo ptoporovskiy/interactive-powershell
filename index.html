@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive PowerShell Command Builder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 Interactive PowerShell Command Builder</h1>
+            <p>Build PowerShell commands visually with an interactive interface</p>
+        </header>
+
+        <div class="builder-section">
+            <div class="command-builder">
+                <div class="step">
+                    <label for="verb-select">1. Choose Verb:</label>
+                    <select id="verb-select">
+                        <option value="">Select a verb...</option>
+                    </select>
+                </div>
+
+                <div class="step">
+                    <label for="noun-select">2. Choose Noun:</label>
+                    <select id="noun-select" disabled>
+                        <option value="">Select a noun...</option>
+                    </select>
+                </div>
+
+                <div class="step">
+                    <label>3. Select Parameters:</label>
+                    <div id="parameters-container" class="parameters-grid">
+                        <!-- Parameters will be populated here -->
+                    </div>
+                </div>
+
+                <div class="step">
+                    <label>4. Add Piping (Optional):</label>
+                    <div id="piping-section">
+                        <button id="add-pipe" disabled>+ Add Pipe</button>
+                        <div id="pipes-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h3>Generated Command:</h3>
+                <div class="command-output">
+                    <code id="generated-command">Select a verb and noun to start building...</code>
+                </div>
+                <button id="copy-command" disabled>📋 Copy Command</button>
+            </div>
+        </div>
+
+        <div class="examples-section">
+            <h2>Common Patterns</h2>
+            <div class="examples-grid">
+                <div class="example-card" data-example-id="file-ops">
+                    <h3>📁 File Operations</h3>
+                    <code>Get-ChildItem -Recurse | Format-Table</code>
+                    <button>Load Example</button>
+                </div>
+                <div class="example-card" data-example-id="data-process">
+                    <h3>📊 Data Processing</h3>
+                    <code>Import-Csv data.csv | Where-Object -Property Name -EQ 'Value' | Select-Object Name, Version</code>
+                    <button>Load Example</button>
+                </div>
+                <div class="example-card" data-example-id="system-mgmt">
+                    <h3>⚙️ System Management</h3>
+                    <code>Get-Process -Name 'chrome' | Stop-Process -Force</code>
+                    <button>Load Example</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
